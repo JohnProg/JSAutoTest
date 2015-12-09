@@ -1,4 +1,5 @@
 "use strict";
+var fs = require('fs');
 
 exports.configure = function (driver) {
   // See whats going on
@@ -12,3 +13,23 @@ exports.configure = function (driver) {
     console.log(' > ' + meth.magenta, path, (data || '').grey);
   });
 };
+
+
+exports.copyFile = function (source, target) {
+    var d = new Date(),
+        CurrentTime = d.getFullYear()+
+                   ''+(d.getMonth()+1)+
+                   ''+(d.getDate()+1)+
+                   '_'+d.getHours()+
+                   ':'+d.getMinutes()+
+                   ':'+d.getSeconds();
+
+    return new Promise(function(resolve, reject) {
+        var rd = fs.createReadStream(source);
+        rd.on('error', reject);
+        var wr = fs.createWriteStream(target+'_'+CurrentTime+'.log');
+        wr.on('error', reject);
+        wr.on('finish', resolve);
+        rd.pipe(wr);
+    });
+}

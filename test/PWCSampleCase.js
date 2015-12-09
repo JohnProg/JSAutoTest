@@ -59,6 +59,7 @@ describe("ios actions", function () {
 
   after(function () {
     try { fs.mkdirSync('/tmp/appiumBackupLog'); } catch(ign) {};
+    try { fs.mkdirSync('/tmp/mochaBackupLog'); } catch(ign) {};
     logger.copyFile(appiumLogFile, "/tmp/appiumBackupLog/appium"+caseName+''+startTimeString);
     logger.copyFile(mochaLogFile, "/tmp/mochaBackupLog/mocha"+caseName+''+startTimeString);
     return driver
@@ -258,7 +259,8 @@ describe("ios actions", function () {
   it("should go through Compliance 5", function () {
     //step 5 of 5
       return driver
-      .waitForElementById('STEP 5 of 5',30000,3000)
+      .waitForElementById('STEP 5 of 5',30000)
+        .should.eventually.exist
       .elementById('One last thing.')
       .elementById('We take accuracy seriously. Help us confirm  your infomation by tapping it below.')
       .elementById('Continue').click()

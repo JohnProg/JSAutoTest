@@ -58,13 +58,13 @@ describe("ios actions", function () {
   });
 
   after(function () {
-    try { fs.mkdirSync('/tmp/appiumBackupLog'); } catch(ign) {};
-    try { fs.mkdirSync('/tmp/mochaBackupLog'); } catch(ign) {};
-    logger.copyFile(appiumLogFile, "/tmp/appiumBackupLog/appium"+caseName+''+startTimeString);
-    logger.copyFile(mochaLogFile, "/tmp/mochaBackupLog/mocha"+caseName+''+startTimeString);
     return driver
       .quit()
       .finally(function () {
+        try { fs.mkdirSync('/tmp/appiumBackupLog'); } catch(ign) {};
+        try { fs.mkdirSync('/tmp/mochaBackupLog'); } catch(ign) {};
+        logger.copyFile(appiumLogFile, "/tmp/appiumBackupLog/appium"+caseName+''+startTimeString);
+        logger.copyFile(mochaLogFile, "/tmp/mochaBackupLog/mocha"+caseName+''+startTimeString);
         if (process.env.SAUCE) {
           return driver.sauceJobStatus(allPassed);
         }

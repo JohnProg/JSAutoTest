@@ -8,11 +8,12 @@ var wd = require('wd'),
 exports.screenshot = function (driver, fileName) {
   var CurrentTime = d.getFullYear()+
                    ''+(d.getMonth()+1)+
-                   ''+(d.getDate()+1)+
+                   ''+d.getDate()+
                    '_'+d.getHours()+
                    ':'+d.getMinutes()+
                    ':'+d.getSeconds();
   return driver
+  .sleep(5000)
   .takeScreenshot()
     .should.eventually.exist
   // save screenshot to local file

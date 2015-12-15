@@ -120,7 +120,7 @@ describe("ios actions", function () {
       });
   });
 
-  it("Adding Invoice", function () {
+    it("Adding Invoice", function () {
     return driver
       .elementById('Add Invoice')
       .elementById('Client name')
@@ -172,6 +172,7 @@ describe("ios actions", function () {
             .getValue().should.become('2000.00')
       })
       .swipe({ startX: 160, startY: 120,endX: 160,  endY: 20, duration: 500 })
+      .swipe({ startX: 160, startY: 120,endX: 160,  endY: 20, duration: 500 })
       .elementById('Invoice date')
       .then(function (el) {
         return driver.tapping(el);
@@ -183,29 +184,23 @@ describe("ios actions", function () {
           return els[2].sendKeys('2016').getValue().should.become('2016')
       })
       .elementById('Done').click()
-      .elementsByClassName('UIATextField')
-      .then(function (els) {
-          return els[5].getValue().should.become('Wed Aug 03')
-      })
+      // .elementsByClassName('UIATextField')
+      // .then(function (els) {
+      //     return els[3].getValue().should.become('Wed Aug 03')
+      // })
       .elementById('Terms')
       .then(function (el) {
           return driver.tapping(el);
       })
       .elementByClassName('UIAPickerWheel')
       .then(function (el) {
-          el.sendKeys('Due in 10 days')
+          return el.sendKeys('Due in 10 days')
       })
       .elementById('Done').click()
-      .elementsByClassName('UIATextField')
-      .then(function (els) {
-          return els[6].getValue.should.become('Wed Aug 03')
-      })
-      .elementsByClassName('UIATextFiled')
-      .then(function (els) {
-          return els[7].sendKeys('Notes11')
-                .getValue().should.become('Notes11')
-      })
-      .swipe({ startX: 160, startY: 20,endX: 165,  endY: 20, duration: 500 })
+      // .elementsByClassName('UIATextField')
+      // .then(function (els) {
+      //     return els[5].getValue.should.become('Due in 10 days')
+      // })
       //scroll page up to show 'save and finish' button
       .swipe({ startX: 160, startY: 500,endX: 160,  endY: 200, duration: 500 })
       .elementById('Save and finish').click()

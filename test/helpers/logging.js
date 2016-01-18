@@ -1,5 +1,6 @@
 "use strict";
-var fs = require('fs');
+var fs = require('fs'),
+    path = require('path')
 
 exports.configure = function (driver) {
   // See whats going on
@@ -32,4 +33,27 @@ exports.copyFile = function (source, target) {
         wr.on('finish', resolve);
         rd.pipe(wr);
     });
-}
+};
+
+exports.mkdirsSync = function (dirname, mode){
+    console.log(dirname);
+    if(fs.existsSync(dirname)){
+        return true;
+    }else{
+        if(this.mkdirsSync(path.dirname(dirname), mode)){
+            fs.mkdirSync(dirname, mode);
+            return true;
+        }
+    };
+};
+
+exports.getCurTimeStr = function (){
+    var d = new Date();
+    var CurTimeStr = d.getFullYear()+
+                  ''+(d.getMonth()+1)+
+                  ''+d.getDate()+
+                  '_'+d.getHours()+
+                  ':'+d.getMinutes()+
+                  ':'+d.getSeconds();
+    return CurTimeStr;
+};

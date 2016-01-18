@@ -1,7 +1,10 @@
 if (process.env.DEV) {
   //pwc
-  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
-  
+  //xcode build path
+  //exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
+  //jenkins build path
+  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-fsqhodwugoufyqeobvabzbzunitz/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
+
   //samples
   exports.iosTestApp = "sample-code/apps/TestApp/build/release-iphonesimulator/TestApp.app";
   exports.iosWebviewApp = "sample-code/apps/WebViewApp/build/release-iphonesimulator/WebViewApp.app";
@@ -10,7 +13,10 @@ if (process.env.DEV) {
   exports.selendroidTestApp = "sample-code/apps/selendroid-test-app.apk";
   } else {
   //pwc
-  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
+  //xcode build path
+  //exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
+  //jenkins build path
+  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-fsqhodwugoufyqeobvabzbzunitz/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
 
   //samples
   exports.iosTestApp = "http://appium.github.io/appium/assets/TestApp7.1.app.zip";

@@ -10,6 +10,7 @@ var wd = require("wd"),
     logger = require('./helpers/logging'),
     fs = require('fs'),
     chore = require('./helpers/chore'),
+    _p = require('./helpers/promise-utils'),
     Dictionary = require('./helpers/StaticStrings/Dictionary');
 
 
@@ -17,6 +18,7 @@ wd.addPromiseChainMethod('copyFile', logger.copyFile);
 wd.addPromiseChainMethod('swipe', actions.swipe);
 wd.addPromiseChainMethod('screenshot', image.screenshot);
 wd.addPromiseChainMethod('screenshotAnyway', image.screenshotAnyway);
+wd.addPromiseChainMethod('ScrollAndShot', chore.ScrollAndShot);
 wd.addPromiseChainMethod('tapping', actions.tapping);
 wd.addElementPromiseChainMethod('tapping',
   function () { return this.browser.tapping(this); });
@@ -35,14 +37,14 @@ describe("ios actions", function () {
   //*************************************NOTICE!!!*****************************************
   var appiumLogFile = '/tmp/appium.log';
   var mochaLogFile = '/tmp/mocha.log';
-  var caseName = 'BOS_OnBoarding_Process';
+  var caseName = 'BOS_OnBoarding_Process_Unrestricted';
   var startTimeString = logger.getCurTimeStr();
   var logDir = '/tmp/JSAutoTest/Logs/'+caseName+''+startTimeString;
   logger.mkdirsSync(logDir);
   logger.mkdirsSync('/tmp/appiumBackupLog');
   logger.mkdirsSync('/tmp/mochaBackupLog');
   serverConfigs.StartAppium('/tmp/appium.log');
-  image.enableScreenShot();
+  //image.disableScreenShot();
 
   before(function () {
     var serverConfig = serverConfigs.local;
@@ -75,6 +77,17 @@ describe("ios actions", function () {
     allPassed = allPassed && this.currentTest.state === 'passed';
   });
 
+  function clickMenuItem(name) {
+    return driver
+      .elementByName(name)
+      .catch(function () {
+        return driver
+          .elementByClassName('UIATableView')
+          .elementsByClassName('>','UIATableCell')
+          .then(_p.filterWithName(name)).first();
+      }).click();
+  }
+
   it("Welcome and sliders page", function () {
     return driver
       .sleep(3000)
@@ -87,14 +100,14 @@ describe("ios actions", function () {
       })
       .waitForElementById('OnboardingInvoices')
       .elementById(Dictionary.NewUserExperience.ONBOARDING_HEADER_INVOICES)
-      .screenshot(driver, logDir, 'Slider1')
+      .screenshot(driver, logDir, 'Slider1_')
       .swipe({ startX: 300, startY: 200,endX: 50,  endY: 200, duration: 500 })
       .waitForElementById('OnboardingReminders')
       .elementById(Dictionary.NewUserExperience.ONBOARDING_HEADER_REMINDERS)
-      .screenshot(driver, logDir, 'Slider2')
+      .screenshot(driver, logDir, 'Slider2_')
       .swipe({ startX: 300, startY: 200,endX: 50,  endY: 200, duration: 500 })
       .waitForElementById('OnboardingRecommendations')
-      .screenshot(driver, logDir, 'Slider3')
+      .screenshot(driver, logDir, 'Slider3_')
       .elementById(Dictionary.NewUserExperience.ONBOARDING_HEADER_RECOMMENDATIONS)
       .elementById('Sign up').click()
       .sleep(1000)
@@ -111,8 +124,8 @@ describe("ios actions", function () {
     return driver
       .waitForElementById(Dictionary.Compliance.STEP1)
       .screenshot(driver, logDir, 'Initial_Step1_compliance')
-      .elementsById(Dictionary.Compliance.STEP1_TITLE)
-      .elementsById(Dictionary.Compliance.STEP1_DESCRIPTION)
+      .elementById(Dictionary.Compliance.STEP1_TITLE)
+      .elementById(Dictionary.Compliance.STEP1_DESCRIPTION)
       .elementsByClassName('UIATextField')
       // type short Business Name to check alert
       .then(function (els) {
@@ -120,7 +133,7 @@ describe("ios actions", function () {
             .sendKeys('Mo')
             .getValue().should.become('Mo')
       })
-      .elementsById(Dictionary.Compliance.STEP1_BUSINESS_NAME_ERROR)
+      .elementById(Dictionary.Compliance.STEP1_BUSINESS_NAME_ERROR)
       .should.eventually.exist
       .screenshot(driver, logDir, 'Step1_ShortBusinessNameAlert')
       .elementsByClassName('UIATextField')
@@ -130,17 +143,25 @@ describe("ios actions", function () {
             .sendKeys('rgan')
             .getValue().should.become('Morgan')
       })
-      .swipe({ startX: 5, startY: 20,endX: 10,  endY: 20, duration: 500 })
-      .sleep(2000)
+      //.swipe({ startX: 5, startY: 20,endX: 10,  endY: 20, duration: 500 })
+      .sleep(500)
       .elementsByClassName('UIATextField')
+      .then(function (els) {
+        return driver.tapping(els[1]);
+      })
       // type Business Address
+      .elementsByClassName('UIATextField')
       .then(function (els) {
           return els[1]
             .sendKeys('MorganAddress')
             .getValue().should.become('MorganAddress')
       })
-      .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
+      //.swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
       .sleep(500)
+      .elementsByClassName('UIATextField')
+      .then(function (els) {
+        return driver.tapping(els[2]);
+      })
       .elementsByClassName('UIATextField')
       // type City
       .then(function (els) {
@@ -295,7 +316,13 @@ describe("ios actions", function () {
       .elementById(Dictionary.Compliance.STEP5_DESCRIPTION)
       .elementById(Dictionary.Compliance.DONT_SEE_YOUR_BUSINESS)
       .screenshot(driver, logDir, 'Step5_BusinessList')
-      .elementById(Dictionary.Compliance.CONTINUE).click()
+      .ScrollAndShot(driver, logDir, 'Step5_1')
+      .ScrollAndShot(driver, logDir, 'Step5_2')
+      .ScrollAndShot(driver, logDir, 'Step5_3')
+      .ScrollAndShot(driver, logDir, 'Step5_4')
+      .ScrollAndShot(driver, logDir, 'Step5_5')
+      //return driver
+      .elementById('UnRestricted Address CA,10000').click()
       .then(function (){
         return logger.copyFile(appiumLogFile, logDir+"/Compliance5_appium");
       })
@@ -304,10 +331,10 @@ describe("ios actions", function () {
       });
   });
 
-  it("Sign up", function () {
-    var randomNum = chore.GetRandomInt(10, 99);
+  it("Checking Sign up", function () {
     //Sign up
     return driver
+      .sleep(3000)
       .waitForElementById(Dictionary.UserAuthentication.SIGNUP_HEADER)
       .screenshot(driver, logDir, 'Initial_SignUp')
       .elementById(Dictionary.UserAuthentication.PASSWORD_RULES_TITLE)
@@ -316,43 +343,6 @@ describe("ios actions", function () {
       .elementById(Dictionary.UserAuthentication.PASSWORD_RULES_ITEM[2])
       .elementById(Dictionary.UserAuthentication.TO_LOGIN)
       .elementById(Dictionary.UserAuthentication.SIGNUP_SUBMIT)
-      .elementsByClassName('UIATextField')
-      // type something
-      .then(function (els) {
-          return els[0]
-            .sendKeys('JSAutotest'+randomNum+'@pwc')
-            .getValue().should.become('JSAutotest'+randomNum+'@pwc')
-            .screenshot(driver, logDir, 'SignUp_EmailAlert')
-            .elementById(Dictionary.UserAuthentication.INVALID_EMAIL)
-      })
-      .elementsByClassName('UIATextField')
-      .then(function (els) {
-          return els[0]
-            .sendKeys('.com')
-            .getValue().should.become('JSAutotest'+randomNum+'@pwc.com');
-      })
-
-      .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
-      .elementsByClassName('UIASecureTextField')
-      // type something
-      .then(function (els) {
-          return els[0]
-            .sendKeys('JSAuto/1')
-      })
-      .elementById('Show Password').click()
-      .screenshot(driver, logDir, 'SignUp_INFOTERMES_Dismissed')
-      .elementById(Dictionary.UserAuthentication.SIGNUP_SUBMIT).click()
-      .sleep(1000)
-      .waitForElementById(Dictionary.EnterFirstInvoice.TITLE)
-      .screenshot(driver, logDir, 'FirstInvoice')
-      .elementById(Dictionary.EnterFirstInvoice.SUBTITLE)
-      .elementById(Dictionary.EnterInvoice.CLIENT_NAME)
-      .elementById(Dictionary.EnterInvoice.AMOUNT_OWED)
-      .elementById(Dictionary.EnterInvoice.INVOICE_DATE)
-      .elementById(Dictionary.EnterInvoice.TERMS)
-      .elementById(Dictionary.EnterInvoice.NOTES)
-      .elementById(Dictionary.EnterInvoice.ADD_FIRST_INVOICE)
-      .elementById(Dictionary.EnterInvoice.SKIP_FOR_NOW)
       .then(function (){
         return logger.copyFile(appiumLogFile, logDir+"/SignUp_appium");
       })
@@ -361,5 +351,4 @@ describe("ios actions", function () {
       });
       //validate page after successful sign up
   });
-
 });

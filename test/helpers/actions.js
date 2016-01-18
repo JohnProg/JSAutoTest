@@ -74,4 +74,9 @@ exports.zoom = function (el) {
     m.add(a1, a2);
     return m.perform();
   }.bind(this));
+
+  exports.sleep = function (timeInMilliseconds) {
+    for(var start = +new Date; +new Date - start <= timeInMilliseconds; ) { };
+    return true;
+  };
 };

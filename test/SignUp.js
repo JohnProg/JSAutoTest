@@ -5,34 +5,56 @@ require("./helpers/setup");
 var wd = require("wd"),
     _ = require('underscore'),
     actions = require("./helpers/actions"),
-    serverConfigs = require('./helpers/appium-servers');
+    serverConfigs = require('./helpers/appium-servers'),
+    image = require("./helpers/image"),
+    logger = require('./helpers/logging'),
+    fs = require('fs');
 
 
+wd.addPromiseChainMethod('copyFile', logger.copyFile);
 wd.addPromiseChainMethod('swipe', actions.swipe);
-wd.addPromiseChainMethod('pinch', actions.pinch);
+wd.addPromiseChainMethod('screenshot', image.screenshot);
 wd.addPromiseChainMethod('tapping', actions.tapping);
-wd.addElementPromiseChainMethod('pinch',
-  function () { return this.browser.pinch(this); });
-wd.addPromiseChainMethod('zoom', actions.zoom);
-wd.addElementPromiseChainMethod('zoom',
-  function () { return this.browser.zoom(this); });
+wd.addElementPromiseChainMethod('tapping',
+  function () { return this.browser.tapping(this); });
 
 describe("ios actions", function () {
   this.timeout(300000);
   var driver;
   var allPassed = true;
 
+  var d = new Date();
+  //*************************************NOTICE!!!*****************************************
+  //!!!!!!!!!If you want log saved for check, make sure you followed Step 4 and 5 in
+  // chapter "How to use" of '../Readme.txt'!!!!!!!!!
+  //*************************************NOTICE!!!*****************************************
+  var appiumLogFile = '/tmp/appium.log';
+  var mochaLogFile = '/tmp/mocha.log';
+  var caseName = 'PWCSampleCaseLog';
+  var startTimeString = d.getFullYear()+
+                    ''+(d.getMonth()+1)+
+                    ''+(d.getDate()+1)+
+                    '_'+d.getHours()+
+                    ':'+d.getMinutes()+
+                    ':'+d.getSeconds();
+  var logDir = './test/Logs/'+caseName+''+startTimeString;
+  try { fs.mkdirSync(logDir); } catch(ign) {};
+
   before(function () {
     var serverConfig = serverConfigs.local;
     driver = wd.promiseChainRemote(serverConfig);
     require("./helpers/logging").configure(driver);
 
-    var desired = _.clone(require("./helpers/caps").ios81);
+    var desired = _.clone(require("./helpers/caps").ios91);
     desired.app = require("./helpers/apps").PWCApp;
+
     return driver.init(desired);
   });
 
   after(function () {
+    try { fs.mkdirSync('/tmp/appiumBackupLog'); } catch(ign) {};
+    logger.copyFile(appiumLogFile, "/tmp/appiumBackupLog/appium"+caseName+''+startTimeString);
+    logger.copyFile(mochaLogFile, "/tmp/mochaBackupLog/mocha"+caseName+''+startTimeString);
     return driver
       .quit()
       .finally(function () {
@@ -55,6 +77,7 @@ describe("ios actions", function () {
       })
       //.swipe({ startX: 89.5, startY: 454.25,endX: 99.5,  endY: 454.25, duration: 500 })
       .waitForElementById('OnboardingInvoices')
+      .screenshot(driver, logDir+"/FirstScreenShot")
       .elementByXPath('//UIAApplication[1]/UIAWindow[1]/UIAElement[2]').click()
       .waitForElementById('When it\\\'s time to get paid, we\\\'ll remind you.')
       .waitForElementById('OnboardingReminders')
@@ -64,7 +87,13 @@ describe("ios actions", function () {
       .waitForElementById('We\\\'ll walk you through the best way to reach out to your client. Good payments make good relationships.')
       .waitForElementById('OnboardingRecommendations')
       .elementById('Sign up').click()
-      .sleep(1000);
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/FirstIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/FirstIt_mocha");
+      });
   });
 
   it("should go through Compliance 1", function () {
@@ -114,7 +143,13 @@ describe("ios actions", function () {
       .elementById('Done').click()
       .sleep(500)
       .elementById('Create profile').click()
-      .sleep(1000);
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/SecondIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/SecondIt_mocha");
+      });
   });
 
   it("should go through Compliance 2", function () {
@@ -132,7 +167,13 @@ describe("ios actions", function () {
           .release();
         return driver.performTouchAction(action);
       })
-      .sleep(1000);
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/ThirdIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/ThirdIt_mocha");
+      });
 
   });
 
@@ -162,7 +203,13 @@ describe("ios actions", function () {
       })
       .sleep(500)
       .elementById('Continue').click()
-      .sleep(500);
+      .sleep(500)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/FourthIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/FourthIt_mocha");
+      });
 
   });
 
@@ -192,43 +239,61 @@ describe("ios actions", function () {
       })
       .sleep(500)
       .elementById('Continue').click()
-      .sleep(1000);
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/FifthIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/FifthIt_mocha");
+      });
   });
 
 
   it("should go through Compliance 5", function () {
     //step 5 of 5
       return driver
-      .waitForElementById('STEP 5 of 5')
+      .waitForElementById('STEP 5 of 5',30000,3000)
       .elementById('One last thing.')
       .elementById('We take accuracy seriously. Help us confirm  your infomation by tapping it below.')
-      .waitForElementById('Continue').click()
-      .sleep(1000);
-    });
+      .elementById('Continue').click()
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/SixthIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/SixthIt_mocha");
+      });
+  });
 
-    it("should go through Sign up", function () {
-      //step 5 of 5
-        return driver
-        .waitForElementById('You\'re in! Create your account credentials.')
-        .elementById('Thanks so much for joining the Business OS community.')
-        .elementsByClassName('UIATextField')
-        // type something
-        .then(function (els) {
-            return els[0]
-              .sendKeys('JSautotest@pwc.com')
-              .getValue().should.become('JSautotest@pwc.com');
-        })
-        .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
-        .elementsByClassName('UIASecureTextField')
-        // type something
-        .then(function (els) {
-            return els[0]
-              .sendKeys('JSau/1j.');
-        })
-        .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
-        .waitForElementById('FINISH UP').click()
-        .sleep(1000);
-        //validate page after successful sign up
-    });
+  it("should go through Sign up", function () {
+    //step 5 of 5
+      return driver
+      .waitForElementById('You\'re in! Create your account credentials.')
+      .elementById('Thanks so much for joining the Business OS community.')
+      .elementsByClassName('UIATextField')
+      // type something
+      .then(function (els) {
+          return els[0]
+            .sendKeys('JSautotest@pwc.com')
+            .getValue().should.become('JSautotest@pwc.com');
+      })
+      .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
+      .elementsByClassName('UIASecureTextField')
+      // type something
+      .then(function (els) {
+          return els[0]
+            .sendKeys('JSau/1j.');
+      })
+      .swipe({ startX: 20, startY: 20,endX: 30,  endY: 20, duration: 500 })
+      .waitForElementById('FINISH UP').click()
+      .sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/SeventhIt_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/SeventhIt_mocha");
+      });
+      //validate page after successful sign up
+  });
 
 });

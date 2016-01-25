@@ -6,15 +6,37 @@ var wd = require("wd"),
     _ = require('underscore'),
     actions = require("./helpers/actions"),
     serverConfigs = require('./helpers/appium-servers'),
+    image = require("./helpers/image"),
+    chore = require("./helpers/chore"),
+    logger = require("./helpers/logging"),
     _p = require('./helpers/promise-utils'),
     Q = require('q');
 
 wd.addPromiseChainMethod('swipe', actions.swipe);
+wd.addPromiseChainMethod('Andscreenshot', image.Andscreenshot);
+wd.addPromiseChainMethod('AndscreenshotAnyway', image.AndscreenshotAnyway);
 
 describe("android complex", function () {
   this.timeout(300000);
   var driver;
   var allPassed = true;
+
+  var d = new Date();
+  //*************************************NOTICE!!!*****************************************
+  //!!!!!!!!!If you want log saved for check, make sure you followed Step 4 and 5 in
+  // chapter "How to use" of '../Readme.txt'!!!!!!!!!
+  //*************************************NOTICE!!!*****************************************
+  var appiumLogFile = '/tmp/appium.log';
+  var mochaLogFile = '/tmp/mocha.log';
+  var caseName = 'android_complex';
+  var startTimeString = chore.getCurTimeStr();
+  var logDir = '/tmp/JSAutoTest/Logs/'+caseName+''+startTimeString;
+  logger.mkdirsSync(logDir);
+  logger.mkdirsSync('/tmp/appiumBackupLog');
+  logger.mkdirsSync('/tmp/mochaBackupLog');
+  serverConfigs.StartAppium('/tmp/appium.log');
+  serverConfigs.StartAndEmulator('ReactNative');
+  image.enableScreenShot();
 
   before(function () {
     var serverConfig = process.env.SAUCE ?
@@ -37,7 +59,15 @@ describe("android complex", function () {
 
   after(function () {
     return driver
+      .AndscreenshotAnyway(driver, logDir, 'LastScreenShot')
       .quit()
+      .then(function (){
+        logger.StopLogcat();
+        logger.GetLogcat(logDir, 'TotalLogcat.log');
+        serverConfigs.CloseAndEmulator();
+        logger.copyFile(appiumLogFile, logDir+'/WholeAppiumLog');
+        return logger.copyFile(mochaLogFile, logDir+'/WholeMochaLog');
+      })
       .finally(function () {
         if (process.env.SAUCE) {
           return driver.sauceJobStatus(allPassed);
@@ -50,7 +80,9 @@ describe("android complex", function () {
   });
 
   it("should find an element", function () {
+    logger.StartLogcat('-D');
     return driver
+      .Andscreenshot(driver, logDir, 'FirstScreenShot')
       .elementByXPath('//android.widget.TextView[@text=\'Animation\']')
       .elementByXPath('//android.widget.TextView')
         .text().should.become('API Demos')
@@ -62,19 +94,28 @@ describe("android complex", function () {
         }
       }).elementByName('App').click()
         .sleep(3000)
+      .Andscreenshot(driver, logDir, 'SearchingForClickable')
       .elementsByAndroidUIAutomator('new UiSelector().clickable(true)')
         .should.eventually.have.length.above(10)
       .elementByXPath('//android.widget.TextView[@text=\'Action Bar\']')
         .should.eventually.exist
+      .Andscreenshot(driver, logDir, 'BecomeAPIDemos')
       .elementsByXPath('//android.widget.TextView')
         .then(_p.filterDisplayed).first()
         .text().should.become('API Demos')
-      .back().sleep(1000);
+      .back().sleep(1000)
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/find_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/find_mocha");
+      })
   });
 
   it("should scroll", function () {
     return driver
       .elementByXPath('//android.widget.TextView[@text=\'Animation\']')
+      .Andscreenshot(driver, logDir, 'MultiTextView')
       .elementsByXPath('//android.widget.TextView')
       .then(function (els) {
         return Q.all([
@@ -88,7 +129,14 @@ describe("android complex", function () {
             duration: 800
           });
         });
-      });
+      })
+
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/scroll_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/scroll_mocha");
+      })
   });
 
   it("should draw a smiley", function () {
@@ -117,6 +165,7 @@ describe("android complex", function () {
       .then(findTouchPaint)
       .click()
       .sleep(5000)
+      .Andscreenshot(driver, logDir, 'BeforeDrawing')
       .then(function () {
         var a1 = new wd.TouchAction();
         a1.press({x: 150, y: 100}).release();
@@ -189,9 +238,17 @@ describe("android complex", function () {
         return driver.performMultiAction(ma)
           // so you can see it
           .sleep(10000)
+          .Andscreenshot(driver, logDir, 'AfterDrawing')
           .back().sleep(1000)
           .back().sleep(1000);
-      });
+      })
+
+      .then(function (){
+        return logger.copyFile(appiumLogFile, logDir+"/Draw_appium");
+      })
+      .then(function (){
+        return logger.copyFile(mochaLogFile, logDir+"/Draw_mocha");
+      })
   });
 
 });

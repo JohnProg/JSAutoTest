@@ -3,7 +3,7 @@ if (process.env.DEV) {
   //xcode build path
   //exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
   //jenkins build path
-  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-fsqhodwugoufyqeobvabzbzunitz/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
+  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
 
   //samples
   exports.iosTestApp = "sample-code/apps/TestApp/build/release-iphonesimulator/TestApp.app";
@@ -16,7 +16,7 @@ if (process.env.DEV) {
   //xcode build path
   //exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/PwC\ SBS.app"
   //jenkins build path
-  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-fsqhodwugoufyqeobvabzbzunitz/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
+  exports.PWCApp = "/Users/appledev108/Library/Developer/Xcode/DerivedData/client-gkcbblpzvtcvogensmvrxnydjjlr/Build/Products/Debug-iphonesimulator/Pwc\ SBS.app";
 
   //samples
   exports.iosTestApp = "http://appium.github.io/appium/assets/TestApp7.1.app.zip";

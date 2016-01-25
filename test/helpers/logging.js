@@ -1,6 +1,7 @@
 "use strict";
 var fs = require('fs'),
-    path = require('path')
+    path = require('path'),
+    chore = require('./chore');
 
 exports.configure = function (driver) {
   // See whats going on
@@ -14,7 +15,6 @@ exports.configure = function (driver) {
     console.log(' > ' + meth.magenta, path, (data || '').grey);
   });
 };
-
 
 exports.copyFile = function (source, target) {
     var d = new Date(),
@@ -47,13 +47,38 @@ exports.mkdirsSync = function (dirname, mode){
     };
 };
 
-exports.getCurTimeStr = function (){
-    var d = new Date();
-    var CurTimeStr = d.getFullYear()+
-                  ''+(d.getMonth()+1)+
-                  ''+d.getDate()+
-                  '_'+d.getHours()+
-                  ':'+d.getMinutes()+
-                  ':'+d.getSeconds();
-    return CurTimeStr;
+var LogcatSpawn = require('child_process').spawn;
+var ResLogcatSpawn;
+
+exports.StartLogcat = function (tag){
+    //chore.ADBCmms('connect 127.0.0.1:5554');
+    chore.Sleep(2000);
+    chore.ADBCmms('shell rm -f /mnt/logcat.log');
+    chore.Sleep(2000);
+    console.log('--------going to get logcat');
+    ResLogcatSpawn=LogcatSpawn('adb', ['shell', "logcat "+tag+" > /mnt/logcat.log"]);
+    ResLogcatSpawn.stdout.on('data', function (data) {
+      console.log('------Logcat stdout:'+data);
+    });
+    ResLogcatSpawn.stderr.on('data', function (data) {
+      console.log('------Logcat stderr:'+data);
+    });
+    //chore.ADBCmms('disconnect');
 };
+
+exports.GetLogcat = function (logDir, fileName){
+    var chore = require('./chore');
+    var spawn = require('child_process').spawn;
+    //chore.ADBCmms('connect 127.0.0.1:5554');
+    chore.Sleep(2000);
+    chore.ADBCmms('shell ls -al /mnt/logcat.log');
+    chore.ADBCmms('pull /mnt/logcat.log '+logDir+'/'+fileName);
+    chore.Sleep(2000);
+    console.log('--------pulling logcat('+fileName+') finished');
+    chore.ADBCmms('shell rm -f /mnt/logcat.log')
+    //chore.ADBCmms('disconnect');
+};
+
+exports.StopLogcat = function (){
+    ResLogcatSpawn.kill('SIGHUP');
+}

@@ -35,7 +35,7 @@ describe("ios actions", function () {
   var appiumLogFile = '/tmp/appium.log';
   var mochaLogFile = '/tmp/mocha.log';
   var caseName = 'BOS_OverDue_Invoice';
-  var startTimeString = logger.getCurTimeStr();
+  var startTimeString = chore.getCurTimeStr();
   var logDir = '/tmp/JSAutoTest/Logs/'+caseName+''+startTimeString;
   logger.mkdirsSync(logDir);
   logger.mkdirsSync('/tmp/appiumBackupLog');

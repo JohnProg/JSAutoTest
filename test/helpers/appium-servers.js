@@ -1,3 +1,4 @@
+var chore = require('./chore');
 
 exports.local = {
   host: 'localhost',
@@ -14,5 +15,18 @@ exports.sauce = {
 exports.StartAppium = function (logPath){
     var spawn = require('child_process').spawn;
     spawn('appium', ['-g','/tmp/appium.log','--log-timestamp','--local-timezone']);
-    for(var start = +new Date; +new Date - start <= 15000; ) { };
+    chore.Sleep(15000);
+}
+
+exports.StartAndEmulator = function (EmulatorName){
+    this.CloseAndEmulator();
+    chore.Sleep(2000);
+    var spawn = require('child_process').spawn;
+    spawn('emulator', ['@'+EmulatorName]);
+    chore.Sleep(15000);
+}
+
+exports.CloseAndEmulator = function (){
+    var exec = require('child_process').exec;
+    exec('ps -Aax|grep emulator|xargs kill -9');
 }
